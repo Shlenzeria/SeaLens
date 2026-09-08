@@ -1,0 +1,102 @@
+CREATE TABLE works (
+    id TEXT NOT NULL PRIMARY KEY,
+    title TEXT NOT NULL,
+    description TEXT NOT NULL DEFAULT '',
+    createdAt INTEGER NOT NULL,
+    modifiedAt INTEGER NOT NULL
+);
+
+CREATE TABLE boards (
+    id TEXT NOT NULL PRIMARY KEY,
+    workId TEXT NOT NULL,
+    name TEXT NOT NULL,
+    orderIndex INTEGER NOT NULL,
+    FOREIGN KEY (workId) REFERENCES works(id) ON DELETE CASCADE
+);
+
+CREATE INDEX boards_workId_index ON boards(workId);
+
+CREATE TABLE chapters (
+    id TEXT NOT NULL PRIMARY KEY,
+    boardId TEXT NOT NULL,
+    title TEXT NOT NULL,
+    content TEXT NOT NULL DEFAULT '',
+    orderIndex INTEGER NOT NULL,
+    createdAt INTEGER NOT NULL,
+    modifiedAt INTEGER NOT NULL,
+    FOREIGN KEY (boardId) REFERENCES boards(id) ON DELETE CASCADE
+);
+
+CREATE INDEX chapters_boardId_index ON chapters(boardId);
+
+-- 应用内部键值表：目前只用来标记“示例数据是否已写入一次”。
+-- 未来版本历史、设置等键值类数据可复用此表，但本阶段不扩展。
+CREATE TABLE app_meta (
+    key TEXT NOT NULL PRIMARY KEY,
+    value TEXT NOT NULL
+);
+
+selectAllWorks:
+SELECT * FROM works ORDER BY createdAt, id;
+
+selectWorkById:
+SELECT * FROM works WHERE id = ?;
+
+insertWork:
+INSERT INTO works(id, title, description, createdAt, modifiedAt)
+VALUES (?, ?, ?, ?, ?);
+
+updateWork:
+UPDATE works
+SET title = ?, description = ?, modifiedAt = ?
+WHERE id = ?;
+
+deleteWork:
+DELETE FROM works WHERE id = ?;
+
+selectBoardsByWork:
+SELECT * FROM boards
+WHERE workId = ?
+ORDER BY orderIndex, id;
+
+insertBoard:
+INSERT INTO boards(id, workId, name, orderIndex)
+VALUES (?, ?, ?, ?);
+
+deleteBoardsByWork:
+DELETE FROM boards WHERE workId = ?;
+
+selectChapterSummariesByBoard:
+SELECT id, title, createdAt, modifiedAt, orderIndex
+FROM chapters
+WHERE boardId = ?
+ORDER BY orderIndex, createdAt, id;
+
+selectChapterById:
+SELECT * FROM chapters WHERE id = ?;
+
+insertChapter:
+INSERT INTO chapters(id, boardId, title, content, orderIndex, createdAt, modifiedAt)
+VALUES (?, ?, ?, ?, ?, ?, ?);
+
+updateChapterTitle:
+UPDATE chapters
+SET title = ?, modifiedAt = ?
+WHERE id = ?;
+
+updateChapterContent:
+UPDATE chapters
+SET content = ?, modifiedAt = ?
+WHERE id = ?;
+
+deleteChaptersByBoard:
+DELETE FROM chapters WHERE boardId = ?;
+
+deleteChapter:
+DELETE FROM chapters WHERE id = ?;
+
+selectMetaValue:
+SELECT value FROM app_meta WHERE key = ?;
+
+insertMeta:
+INSERT OR REPLACE INTO app_meta(key, value) VALUES (?, ?);

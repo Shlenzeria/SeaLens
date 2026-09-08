@@ -1,0 +1,26 @@
+# Gradle / Kotlin
+.gradle/
+.gradle-user-home/
+.android-user-home/
+.kotlin/
+build/
+**/build/
+
+# Local signing keys / tooling caches
+*.keystore
+*.jks
+
+# Android SDK local configuration
+local.properties
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.code-workspace
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.log
